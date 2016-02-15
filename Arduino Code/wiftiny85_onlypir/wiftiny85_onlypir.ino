@@ -1,8 +1,7 @@
-/*
-  Blink
-  Turns on an LED on for one second, then off for one second, repeatedly.
+/*Test code 
+  Turns on an LED based on the PIR sensor attached to the Attiny85  .
  
-  This example code is in the public domain.
+  
  */
  
 // Pin 13 has an LED connected on most Arduino boards.

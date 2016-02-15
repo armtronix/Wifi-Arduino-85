@@ -1,24 +1,27 @@
 /*
-  Code for Attiny85 microcontroller using Software serial to send AT commands to Esp8266-01 module  
-  Using this code you will be able to attach a PIR sensor to one of the gpio(GPIO 2) of the Attiny85
-  and use it to control your relay or control it through wifi using android phone 
+Code for Attiny85 microcontroller using Software serial to send AT commands to Esp8266-01 module
+ 
  */
 #include <SoftwareSerial.h>
-int led = 0;
-int relay01 = 1;
-int pir = 2;
-//int PIR_STATUS_FLAG = 0;
-boolean ENABLE_SENSOR =0;
-int pir_status;
+int relay01 = 0;
+int led = 1;
+int relay02 = 2;
 
 SoftwareSerial mySerial(3, 4); // RX, TX  Port 4 ---Rx Esp8266 Port 3---- Tx Esp8266
 
 void setup()  
 {
+  // Open serial communications and wait for port to open:
+  //Serial.begin(57600);
+  //while (!Serial) { wait for serial port to connect. Needed for Leonardo only
+ // }//
 
-  pinMode(led, OUTPUT);
+
+ // Serial.println("Goodnight moon!");
+
+  // set the data rate for the SoftwareSerial port
   pinMode(relay01, OUTPUT);
-  pinMode(pir, INPUT);
+  pinMode(led, OUTPUT);
   mySerial.begin(4800);
   delay(1000);
   esp8266_setup();
@@ -27,44 +30,44 @@ void setup()
 
 void esp8266_setup()
 {
-//  serialFlush();
+  serialFlush();
   
  mySerial.println("AT+RST");
  delay(3000);
- //display_serial();
-// serialFlush();
+ display_serial();
+ serialFlush();
  mySerial.println("ATE1");
  delay(2000);
- //display_serial();
+ display_serial();
  mySerial.println("AT");
  delay(2000);
- //display_serial();
-// serialFlush();
+ display_serial();
+ serialFlush();
  delay(1000);
  mySerial.println("AT+CWMODE=3");
  delay(2000);
- //display_serial();
- //serialFlush();
+ display_serial();
+ serialFlush();
  delay(1000);
  mySerial.println("AT+CIFSR");
  delay(3000);
-// display_serial();
-// serialFlush();
+ display_serial();
+ serialFlush();
  mySerial.println("AT+CIPMUX=1");
  delay(2000);
- //display_serial();
-// serialFlush();
+ display_serial();
+ serialFlush();
  mySerial.println("AT+CIPSERVER=1");
  delay(2000);
- //display_serial();
-// serialFlush();
+ display_serial();
+ serialFlush();
   //mySerial.println("AT+CIPAP?");
  //delay(2000);
  //display_serial();
  //serialFlush();
  mySerial.println("ATE1");
  delay(2000);
- //display_serial();
+ display_serial();
 }
 
 void loop() // run over and over
@@ -75,14 +78,14 @@ void loop() // run over and over
   //delay(20);
   //mySerial.write(mySerial.read());
    display_serial_loop();
-   // serialFlush(); 
+    serialFlush(); 
 }
-//void serialFlush(){
-//  while(mySerial.available() > 0) {
-//    char t = mySerial.read();
-//  }
-//}  
-//unsigned long display_serial() {delay(100);}
+void serialFlush(){
+  while(mySerial.available() > 0) {
+    char t = mySerial.read();
+  }
+}  
+unsigned long display_serial() {delay(100);}
 /*
 //unsigned long display_serial() 
 //{
@@ -111,19 +114,13 @@ void loop() // run over and over
 
 unsigned long display_serial_loop() 
 {
-char data[45];
+char data[100];
  int m=0;
- int n=45;
+ int n=100;
  int o=0;
  int x;
  int y;
  char ssid[24];
- pir_status=digitalRead(pir);
- 
-
- 
- 
- 
  for(m=0; m<n; m++) 
         {
         data[m]=0;     
@@ -191,7 +188,7 @@ char data[45];
                           if(((data[o+7]=='t')&&(data[o+8]=='u')&&(data[o+12]=='o')&&(data[o+13]=='n'))||((data[o+7]=='o')&&(data[o+8]=='n')))
                           {
                               digitalWrite(relay01, HIGH);
-                              digitalWrite(led, LOW);
+                              digitalWrite(led, HIGH);
                               mySerial.println("AT+CIPSEND=0,12");
                               delay(70);
                               mySerial.print("Relay is on"); 
@@ -201,53 +198,14 @@ char data[45];
                           else if(((data[o+7]=='t')&&(data[o+8]=='u')&&(data[o+12]=='o')&&(data[o+13]=='f')&&(data[o+14]=='f'))||((data[o+7]=='o')&&(data[o+8]=='f')))
                             {
                               digitalWrite(relay01, LOW);
-                              digitalWrite(led, HIGH);
+                              digitalWrite(led, LOW);
                               mySerial.println("AT+CIPSEND=0,13");
                               delay(70);
                               mySerial.print("Relay is off");
                               mySerial.print("\n\r"); 
 
                             }
-                          else if(((data[o+8]=='s')&&(data[o+9]=='t')&&(data[o+10]=='a')&&(data[o+12]=='t')))
-                            {
-                              //digitalWrite(led, LOW);
-                              ENABLE_SENSOR=1;
-                              mySerial.println("AT+CIPSEND=0,15");
-                              delay(70);
-                              mySerial.print("Sensor Enabled");
-                              mySerial.print("\n\r"); 
-
-                            }
-                         else if(((data[o+8]=='s')&&(data[o+9]=='t')&&(data[o+10]=='o')))
-                            {
-                              //digitalWrite(led, HIGH);
-                              ENABLE_SENSOR=0;
-                              mySerial.println("AT+CIPSEND=0,16");
-                              delay(70);
-                              mySerial.print("Sensor Disabled");
-                              mySerial.print("\n\r"); 
-
-                            }
-                          else if(((data[o+7]=='s')&&(data[o+8]=='t')&&(data[o+11]=='u')))
-                            {
-                              if(pir_status==1)
-                              {
-                                //digitalWrite(led, HIGH);
-                                mySerial.println("AT+CIPSEND=0,20");
-                                delay(70);
-                                mySerial.print("Some one is present");
-                                mySerial.print("\n\r"); 
-                              }
-                              else if(pir_status==0)
-                              {
-                                //digitalWrite(led, LOW);
-                                mySerial.println("AT+CIPSEND=0,18");
-                                delay(70);
-                                mySerial.print("No one is present");
-                                mySerial.print("\n\r");
-                              }
-                            }
-                          else if((data[o+8]=='%')&&(data[o+11]==','))  //eg  %21,"DLink","1234567890"  to set SSID and password but long string donot work 
+                          else if((data[o+8]=='%')&&(data[o+11]==','))
                             { 
                                //char at_temp[15]="AT+CIPSEND=0,";
                                //char at_temp2[10]="AT+CWJAP=";
@@ -299,20 +257,73 @@ char data[45];
          {
 
          }
-
-  if((ENABLE_SENSOR ==1) && (pir_status ==1))
- {
-   //digitalWrite(relay01, HIGH);
-   digitalWrite(led, LOW);
- }
- else if((ENABLE_SENSOR ==1) && (pir_status==0))
- {
-   //digitalWrite(relay01, LOW);
-   digitalWrite(led, HIGH);
- }
- else
- {
- }   
+      //}
+           
+   /*    
+    if((data[6]=='O')&&(data[7]=='n')&&(data[8]=='1'))
+     {
+      mySerial.println("AT+CIPSEND=0,17");
+      delay(2000);
+      mySerial.println("Relay one is on"); 
+      //digitalWrite(relay01, HIGH);
+      for(m=0; m<12; m++) 
+        {
+         data[m]=0;
+         
+        }
+     }
+    else if((data[6]=='O')&&(data[7]=='n')&&(data[8]=='2'))
+     {
+      mySerial.println("AT+CIPSEND=0,17");
+      delay(2000);
+      mySerial.println("Relay two is on"); 
+      //digitalWrite(relay02, HIGH);
+      for(m=0; m<12; m++) 
+        {
+         data[m]=0;
+         
+        }
+     }
+    else if((data[6]=='O')&&(data[7]=='f')&&(data[8]=='f')&&(data[9]=='1'))
+     {
+      mySerial.println("AT+CIPSEND=0,18");
+      delay(2000);
+      mySerial.println("Relay one is off"); 
+      //digitalWrite(relay01, LOW);
+      for(m=0; m<12; m++) 
+        {
+         data[m]=0;
+         
+        }  
+     }
+    else if((data[6]=='O')&&(data[7]=='f')&&(data[8]=='f')&&(data[9]=='2'))
+     {
+      mySerial.println("AT+CIPSEND=0,18");
+      delay(2000);
+      mySerial.println("Relay two is off"); 
+      //digitalWrite(relay01, HIGH);
+      for(m=0; m<12; m++) 
+        {
+         data[m]=0;
+         
+        }
+     }
+     else if((data[6]=='T')&&(data[7]=='e')&&(data[8]=='m')&&(data[9]=='p'))
+      {
+        
+       mySerial.println("AT+CIPSEND=0,24");
+       delay(2000);
+       mySerial.print("Temperature is:");
+       //mySerial.print(sensor.temp()); 
+       mySerial.println(" C");
+       
+       for(m=0; m<12; m++) 
+        {
+         data[m]=0;     
+        }  
+     }
+     */
+     
      
    }
  
