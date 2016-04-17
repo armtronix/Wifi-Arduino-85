@@ -280,7 +280,12 @@ void webHandleClearRom(){
 }
 
 void webHandleGpio(){
+  // http://192.168.1.10/gpio?state_sw=%2BATturn_on   //to turn on
+  // http://192.168.1.10/gpio?state_sw=%2BATturn_off  // to turn off
+  // http://192.168.1.10/gpio?state_sensor=1           //to enable sensor mode
+  // http://192.168.1.10/gpio?state_sensor=0           // to disable sensor mode
   String s;
+  int state_sensor;
    // Set GPIO according to the request
     if (server.arg("state_sw")=="+ATturn_on" || server.arg("state_sw")=="+ATturn_off" ) {
       String state_sw = server.arg("state_sw");
@@ -288,6 +293,17 @@ void webHandleGpio(){
       //Serial.print(server.arg("state_sw"));
      // Serial.print("Light switched via web request to  ");      
       Serial.println(state_sw);      
+    }
+    if (server.arg("state_sensor")=="1") {
+       state_sensor = server.arg("state_sensor").toInt();
+     
+      Serial.println("+ATstart");           
+    }
+     else if ( server.arg("state_sensor")=="0")
+   {
+      state_sensor = server.arg("state_sensor").toInt();
+      Serial.println("+ATstop");      
+        
     }
 //     if (server.arg("state_led")=="1" || server.arg("state_led")=="0" ) {
 //      int state_led = server.arg("state_led").toInt();
@@ -302,8 +318,13 @@ void webHandleGpio(){
     s += ("+ATturn_on")?"checked":"";
     s += ">LIGHT_On<input type='radio' name='state_sw' value='+ATturn_off' ";
     s += ("+ATturn_off")?"":"checked";
-    s += ">LIGHT_Off <input type='submit' value='Submit'></form></p>";   
-
+    s += ">LIGHT_Off <input type='submit' value='Submit'></form></p>";
+    s += "Sensor is now ";
+    s += "<p>Change to <form action='gpio'><input type='radio' name='state_sensor' value='1' ";   
+    s += ("state_sensor")?"checked":"";
+    s += ">SENSOR_ON <input type='radio' name='state_sensor' value='0' ";
+    s += ("state_sensor")?"":"checked";
+    s += ">SENSOR_OFF <input type='submit' value='Submit'></form></p>"; 
 //    s += "LED is now ";
 //    s += (digitalRead(OUTLED))?"ON":"OFF";
 //    s += "<p>Change to <form action='gpio'><input type='radio' name='state_led' value='1' ";

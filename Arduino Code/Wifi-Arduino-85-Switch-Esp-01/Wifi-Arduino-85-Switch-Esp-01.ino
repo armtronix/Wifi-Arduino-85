@@ -209,6 +209,10 @@ void loop() {
           }                    
           if (mqttClient.connected()){            
               //Debugln("mqtt handler");
+              if(Serial.available())
+              {
+              toPub=1;
+              }
               mqtt_handler();
           } else {
               Debugln("mqtt Not connected!");

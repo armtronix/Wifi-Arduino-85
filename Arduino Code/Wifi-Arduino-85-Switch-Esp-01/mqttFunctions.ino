@@ -77,7 +77,11 @@ void mqtt_arrived(char* subTopic, byte* payload, unsigned int length) { // handl
 //  }        
 }
 
-boolean pubState(){ //Publish the current state of the light    
+boolean pubState(){ //Publish the current state of the light  
+  char serialinData[30];
+  char serialinChar=-1; 
+  byte serialIndex = 0;
+  int stringComplete = 0;  
   if (!connectMQTT()){
       delay(100);
       if (!connectMQTT){                            
@@ -86,9 +90,44 @@ boolean pubState(){ //Publish the current state of the light
         return false;
       }
     }
-    if (mqttClient.connected()){      
+    if (mqttClient.connected()){
+      
+       while (Serial.available()) {
+    // read the most recent byte (which will be from 0 to 255):
+
+    if(serialIndex < 29) // One less than the size of the array
+        {
+            serialinChar = Serial.read(); // Read a character
+            serialinData[serialIndex] = serialinChar; // Store it
+            serialIndex++; // Increment where to write next
+            serialinData[serialIndex] = '\0'; // Null terminate the string
+        }
+    
+    //String attiny_Data = String(Serial.read(),HEX);
+    if (serialinChar == '\n') {
+      stringComplete=1;
+    }
+    
+   }
+   delay(350);
+   
+    if(stringComplete==1)
+    {
+         //Serial.println(WiFi.localIP());
+         //delay(300);
+         mqttClient.publish((char*)pubTopic.c_str(),serialinData);
+         
+         for (int i=0;i<19;i++)
+         {
+            serialinData[i]=0;
+         }
+        serialIndex=0;
+        stringComplete=0;
+        
+     }
+        
         //String state = (digitalRead(OUTPIN))?"1":"0";
-        Serial.println("To publish state " + state );  
+      //  Serial.println("To publish state " + state );  
       if (mqttClient.publish((char*)pubTopic.c_str(), (char*) state.c_str())) {
         Serial.println("Publish state OK");        
         return true;
